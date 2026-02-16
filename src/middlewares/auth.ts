@@ -44,6 +44,7 @@ declare global {
                 message: "Unauthorized: Email not verified"
              });
         }
+        //attach ment to the databaseuser to the request object
         req.user ={
             id: session.user.id,
             email: session.user.email,

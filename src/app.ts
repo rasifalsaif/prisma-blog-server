@@ -29,7 +29,7 @@ app.use('/posts', postRouter);
 
 
 app.get('/', (req, res) => {
-    res.send('Hello, World!');
+    res.send('Server is running');
 });
 
 export default app;
