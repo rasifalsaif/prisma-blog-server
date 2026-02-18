@@ -10,7 +10,7 @@ console.log("post.router loaded");
 
 
 
-router.post('/', auth(UserRole.USER), postController.createPost);
+router.post('/', auth(UserRole.USER, UserRole.ADMIN), postController.createPost);
 router.get("/", postController.getAllPosts);
 
 
