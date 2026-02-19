@@ -12,7 +12,19 @@ const createPost = async (data: Omit<Post, "id" | "createdAt" | "updatedAt" | "a
   return result;
 }
 
-const getAllPosts = async ({ search, tags, isFeatured, status, authorId }: { search?: string, tags?: string[] | [] , isFeatured?: boolean | undefined, status: PostStatus | undefined, authorId?: string | undefined}) => {
+const getAllPosts = async ({ search, tags, isFeatured, status, authorId, page, limit, skip, sortBy, sortOrder }
+  : {
+    search?: string,
+    tags?: string[] | [],
+    isFeatured?: boolean | undefined,
+    status: PostStatus | undefined,
+    authorId?: string | undefined,
+    page: number,
+    limit: number,
+    skip: number,
+    sortBy: string,
+    sortOrder: string
+  }) => {
 
   const andConditions: PostWhereInput[] = [];
   if (search) {
@@ -64,14 +76,55 @@ const getAllPosts = async ({ search, tags, isFeatured, status, authorId }: { sea
     });
   }
 
-  const result = await prisma.post.findMany({
+  const allPost = await prisma.post.findMany({
+    skip,
+    take: limit,
     where: andConditions.length > 0 ? { AND: andConditions } : {},
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
   });
 
-  return result;
+  const total = await prisma.post.count({
+    where: { AND: andConditions }
+  });
+
+  return {
+    data: allPost,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    }
+  };
 };
+
+const getPostById = async (postId: string) => {
+  console.log("getPostById called");
+  return await prisma.$transaction(async (tx) => {
+    await tx.post.update({
+      where: {
+        id: postId,
+      },
+      data: {
+        views: {
+          increment: 1,
+        }
+      }
+    })
+    const postData = await tx.post.findUnique({
+      where: {
+        id: postId,
+      },
+    });
+    return postData;
+  })
+
+}
 
 export const postService = {
   createPost,
   getAllPosts,
+  getPostById,
 };

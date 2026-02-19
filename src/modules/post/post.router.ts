@@ -12,6 +12,7 @@ console.log("post.router loaded");
 
 router.post('/', auth(UserRole.USER, UserRole.ADMIN), postController.createPost);
 router.get("/", postController.getAllPosts);
+router.get("/:postId", postController.getPostById);
 
 
 export const postRouter = router;

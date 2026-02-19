@@ -7,8 +7,8 @@ async function seedAdmin() {
     try {
         console.log("****Admin Seeding Started****")
         const adminData = {
-            name: "Admin Saheb 5",
-            email: "admin5@gmail.com",
+            name: "Admin Saheb 6",
+            email: "admin6@gmail.com",
             role: UserRole.ADMIN,
             password: "admin1234", // In a real application, make sure to hash the password before storing it in the database
             emailVerified: true,
@@ -53,3 +53,4 @@ async function seedAdmin() {
 
 }
 seedAdmin();
+
