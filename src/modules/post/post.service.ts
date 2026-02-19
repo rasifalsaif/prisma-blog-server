@@ -1,4 +1,4 @@
-import { Post, PostStatus } from "../../../generated/prisma/client";
+import { CommentStatus, Post, PostStatus } from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 
@@ -117,6 +117,28 @@ const getPostById = async (postId: string) => {
       where: {
         id: postId,
       },
+      include: {
+        comments: {
+          where: {
+            parentId: null,
+            STATUS: CommentStatus.APPROVED,
+          },
+          include: {
+            replies: {
+              where: {
+                STATUS: CommentStatus.APPROVED,
+              },
+              include: {
+                replies: {
+                  where: {
+                    STATUS: CommentStatus.APPROVED,
+                  },
+                }
+              }
+            }
+          }
+        }
+      }
     });
     return postData;
   })
