@@ -166,8 +166,75 @@ const getPostById = async (postId: string) => {
 
 }
 
+const getMyPosts = async (authorId: string) => {
+  const userInfo = await prisma.user.findUniqueOrThrow({
+    where: {
+      id: authorId,
+      status: "ACTIVE",
+    },
+    select: {
+      id: true,
+    }
+  })
+  const result = await prisma.post.findMany({
+    where: {
+      authorId: authorId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      _count: {
+        select: {
+          comments: true,
+        }
+      }
+    }
+  })
+  // count method simple ebong efficient
+  const total = await prisma.post.count({
+    where: {
+      authorId: authorId,
+    },
+  });
+
+  return {
+    data: result,
+    total,
+  }
+}
+
+const updatePost = async (postId: string, data: Partial<Post>, authorId: string, isAdmin: boolean) => {
+  const postData = await prisma.post.findUniqueOrThrow({
+    where: {
+      id: postId,
+    },
+    select: {
+      id: true,
+      authorId: true,
+    }
+  })
+
+  if (!isAdmin && (postData.authorId !== authorId)) {
+    throw new Error("You are not authorized to update this post");
+  }
+  if (!isAdmin) {
+    delete data.isFeatured
+  }
+
+  const result = await prisma.post.update({
+    where: {
+      id: postId,
+    },
+    data: data,
+  })
+  return result;
+}
+
 export const postService = {
   createPost,
   getAllPosts,
   getPostById,
+  getMyPosts,
+  updatePost,
 };
