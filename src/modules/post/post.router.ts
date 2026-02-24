@@ -16,13 +16,23 @@ router.get("/my-posts", auth(UserRole.USER, UserRole.ADMIN), postController.getM
 
 router.get("/", postController.getAllPosts);
 
-router.get("/:postId", postController.getPostById);
+const validateUUID = (req: Request, res: Response, next: NextFunction) => {
+    const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    const postId = req.params.postId;
+
+    if (typeof postId !== 'string' || !uuidRegex.test(postId)) {
+        return next('route'); // Skip this router and move to the next (app.ts notFound)
+    }
+    next();
+};
 
 router.get("/view/stats", auth(UserRole.ADMIN), postController.getStats);
 
-router.patch("/:postId", auth(UserRole.USER, UserRole.ADMIN), postController.updatePost);
+router.get("/:postId", validateUUID, postController.getPostById);
 
-router.delete("/:postId", auth(UserRole.USER, UserRole.ADMIN), postController.deletePost);
+router.patch("/:postId", validateUUID, auth(UserRole.USER, UserRole.ADMIN), postController.updatePost);
+
+router.delete("/:postId", validateUUID, auth(UserRole.USER, UserRole.ADMIN), postController.deletePost);
 
 
 

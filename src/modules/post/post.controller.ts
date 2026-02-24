@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { postService } from "./post.service";
 import { PostStatus } from "@prisma/client";
 import paginationSortingHelper from "../../helpers/paginationSortingHelper";
 import { UserRole } from "../../middlewares/auth";
 
-const createPost = async (req: Request, res: Response) => {
+const createPost = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
         if (!req.user) {
@@ -14,10 +14,10 @@ const createPost = async (req: Request, res: Response) => {
         const result = await postService.createPost(req.body, req.user.id);
         res.status(201).json(result);
     } catch (error) {
-        res.status(400).json({ error: "Failed to create post", details: error instanceof Error ? error.message : "Unknown error" });
+        next(error);
     }
 }
-const getAllPosts = async (req: Request, res: Response) => {
+const getAllPosts = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { search } = req.query;
         console.log("search query:", search);
@@ -47,15 +47,11 @@ const getAllPosts = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to retrieve posts",
-            details: error instanceof Error ? error.message : "Unknown error"
-        });
+        next(error);
     }
 };
 
-const getPostById = async (req: Request, res: Response) => {
+const getPostById = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
         const { postId } = req.params;
@@ -69,15 +65,11 @@ const getPostById = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to retrieve post",
-            details: error instanceof Error ? error.message : "Unknown error"
-        });
+        next(error);
     }
 }
 
-const getMyPosts = async (req: Request, res: Response) => {
+const getMyPosts = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user;
         if (!user) {
@@ -91,16 +83,11 @@ const getMyPosts = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (error: any) {
-        console.error(error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to retrieve posts",
-            details: error instanceof Error ? error.message : "Unknown error"
-        });
+        next(error);
     }
 }
 
-const updatePost = async (req: Request, res: Response) => {
+const updatePost = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user;
         if (!user) {
@@ -118,16 +105,12 @@ const updatePost = async (req: Request, res: Response) => {
             message: "Post updated successfully",
             data: result,
         });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to update post",
-            details: error instanceof Error ? error.message : "Unknown error"
-        });
+    } catch (error: any) {
+        next(error);
     }
 }
 
-const deletePost = async (req: Request, res: Response) => {
+const deletePost = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user;
         if (!user) {
@@ -146,15 +129,11 @@ const deletePost = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to delete post",
-            details: error instanceof Error ? error.message : "Unknown error"
-        });
+        next(error);
     }
 }
 
-const getStats = async (req: Request, res: Response) => {
+const getStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const result = await postService.getStats();
         res.status(200).json({
@@ -163,11 +142,7 @@ const getStats = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to retrieve stats",
-            details: error instanceof Error ? error.message : "Unknown error"
-        });
+        next(error);
     }
 }
 
